@@ -12,15 +12,32 @@ export default async function DashboardLayout({
 }) {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Try to get user with error handling
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (error) {
+      console.error("[v0] Auth error in dashboard layout:", error)
+      redirect("/login")
+    }
+    user = data.user
+  } catch (error) {
+    console.error("[v0] Failed to fetch user in dashboard layout:", error)
+    redirect("/login")
+  }
 
   if (!user) {
     redirect("/login")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+  // Try to get profile with error handling
+  let profile = null
+  try {
+    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+    profile = data
+  } catch (error) {
+    console.error("[v0] Failed to fetch profile:", error)
+  }
 
   const userProfile: Profile = profile || {
     id: user.id,
@@ -29,6 +46,7 @@ export default async function DashboardLayout({
     role: "user",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    activo: true,
   }
 
   return (
