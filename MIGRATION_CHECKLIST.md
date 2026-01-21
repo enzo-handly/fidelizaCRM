@@ -565,17 +565,17 @@
 
 ---
 
-## 🚀 Fase 5: Preparación para Producción (En Progreso - 10%)
+## 🚀 Fase 5: Preparación para Producción (En Progreso - 53%)
 
 ### ⚠️ Issues Críticos (BLOQUEAN PRODUCCIÓN)
 - [x] **Speed Insights**
   - [x] Instalar `@vercel/speed-insights`
   - [x] Agregar `<SpeedInsights />` al layout.tsx
   
-- [ ] **Configuración Next.js**
-  - [ ] Cambiar `ignoreBuildErrors: false` en next.config.mjs
-  - [ ] Habilitar optimización de imágenes
-  - [ ] Configurar `remotePatterns` para Supabase
+- [x] **Configuración Next.js**
+  - [x] Cambiar `ignoreBuildErrors: false` en next.config.mjs
+  - [x] Habilitar optimización de imágenes
+  - [x] Configurar `remotePatterns` para Supabase
 
 - [x] **Seguridad**
   - [x] Crear `.env.example` (sin valores reales)
@@ -583,14 +583,19 @@
   - [x] Remover credenciales hardcodeadas de app/api/setup-admin/route.ts
   - [x] Verificar que `.env.local` está en `.gitignore`
 
-- [ ] **Error Boundaries**
-  - [ ] Crear `app/error.tsx` (global)
-  - [ ] Crear `app/dashboard/error.tsx` (dashboard)
+- [x] **Sesiones y Autenticación**
+  - [x] Crear `middleware.ts` para refresh automático de sesiones
+  - [x] Protección de rutas dashboard (redirect a /login)
+  - [x] Redirect de usuarios autenticados desde /login y /setup
+
+- [x] **Error Boundaries**
+  - [x] Crear `app/error.tsx` (global)
+  - [x] Crear `app/dashboard/error.tsx` (dashboard)
   - [ ] Crear `app/dashboard/*/error.tsx` para rutas críticas
 
 ### 🟠 Issues Importantes (RESOLVER PRONTO)
-- [ ] **Logging**
-  - [ ] Crear `lib/logger.ts`
+- [x] **Logging**
+  - [x] Crear `lib/logger.ts`
   - [ ] Reemplazar console.log con logger.info
   - [ ] Reemplazar console.error con logger.error
   - [ ] Configurar logging solo en development
@@ -623,4 +628,4 @@
 
 **Última actualización**: 2026-01-21  
 **Próxima revisión**: Después de completar issues críticos  
-**Estado**: 🚀 Preparando para producción - 1/15 items completados
+**Estado**: 🚀 Preparando para producción - 8/15 items completados (53%)

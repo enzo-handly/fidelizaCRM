@@ -5,7 +5,8 @@ import { withAuth } from "@/lib/auth/middleware"
 import { handleError, type ActionResult } from "@/lib/errors/error-handler"
 import { ClienteRepository } from "@/lib/repositories/cliente-repository"
 import { ClienteService } from "@/lib/services/cliente-service"
-import type { Cliente } from "@/lib/types"
+import { CitaRepository } from "@/lib/repositories/cita-repository"
+import type { Cliente, Cita } from "@/lib/types"
 
 // Re-export types for backward compatibility
 export interface CreateClienteData {
@@ -96,6 +97,28 @@ export async function deleteCliente(id: string): Promise<ActionResult<void>> {
     revalidatePath("/dashboard/clientes")
     
     return { success: true, data: undefined }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+/**
+ * Get all citas for a specific cliente
+ * Returns citas ordered by date (ascending) with subservicios and totals
+ * Requires authentication
+ */
+export async function getClienteCitas(clienteId: string): Promise<ActionResult<Cita[]>> {
+  try {
+    // Authenticate user
+    const { supabase } = await withAuth()
+    
+    // Create repository instance
+    const citaRepository = new CitaRepository(supabase)
+    
+    // Get citas for cliente (repository already includes subservicios relation)
+    const citas = await citaRepository.findByClienteId(clienteId)
+    
+    return { success: true, data: citas }
   } catch (error) {
     return handleError(error)
   }

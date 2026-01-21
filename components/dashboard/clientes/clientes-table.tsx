@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,10 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { EditClienteDialog } from "./edit-cliente-dialog"
+import { ViewClienteCitasDialog } from "./view-cliente-citas-dialog"
 import { DeleteAlertDialog } from "@/components/ui/delete-alert-dialog"
 import { TableSearch } from "@/components/ui/table-search"
 import type { Cliente } from "@/lib/types"
-import { MoreHorizontal, Pencil, Trash2, UserCircle, Baby } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, UserCircle, Baby, Calendar } from "lucide-react"
 import { deleteCliente } from "@/app/actions/clientes"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTableActions, useTableSearch } from "@/lib/hooks"
@@ -44,6 +46,14 @@ export function ClientesTable({ clientes }: ClientesTableProps) {
     items: clientes,
     searchableFields: ["nombre", "email", "contacto"],
   })
+
+  const [citasDialogOpen, setCitasDialogOpen] = useState(false)
+  const [selectedClienteForCitas, setSelectedClienteForCitas] = useState<Cliente | null>(null)
+
+  const openCitas = (cliente: Cliente) => {
+    setSelectedClienteForCitas(cliente)
+    setCitasDialogOpen(true)
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
@@ -148,6 +158,10 @@ export function ClientesTable({ clientes }: ClientesTableProps) {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                           <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => openCitas(cliente)}>
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Ver Citas
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEdit(cliente)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Editar
@@ -186,6 +200,12 @@ export function ClientesTable({ clientes }: ClientesTableProps) {
       {selectedCliente && (
         <EditClienteDialog cliente={selectedCliente} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
       )}
+
+      <ViewClienteCitasDialog
+        cliente={selectedClienteForCitas}
+        open={citasDialogOpen}
+        onOpenChange={setCitasDialogOpen}
+      />
     </>
   )
 }

@@ -10,6 +10,11 @@ export function formatPrice(price: number): string {
 }
 
 /**
+ * Alias for formatPrice - Format currency in PYG
+ */
+export const formatCurrency = formatPrice
+
+/**
  * Format date to localized string
  */
 export function formatDate(dateString: string): string {
