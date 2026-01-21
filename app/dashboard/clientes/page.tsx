@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { ClientesTable } from "@/components/dashboard/clientes-table"
-import { CreateClienteDialog } from "@/components/dashboard/create-cliente-dialog"
+import { ClientesTable } from "@/components/dashboard/clientes/clientes-table"
+import { CreateClienteDialog } from "@/components/dashboard/clientes/create-cliente-dialog"
 import type { Cliente } from "@/lib/types"
 
 export default async function ClientesPage() {

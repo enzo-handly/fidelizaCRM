@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form"
+import { ProfileSettingsForm } from "@/components/dashboard/shared/profile-settings-form"
 import type { Profile } from "@/lib/types"
 
 export default async function SettingsPage() {

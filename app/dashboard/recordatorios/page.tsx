@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { RecordatoriosTable } from "@/components/dashboard/recordatorios-table"
-import { CreateRecordatorioDialog } from "@/components/dashboard/create-recordatorio-dialog"
+import { RecordatoriosTable } from "@/components/dashboard/recordatorios/recordatorios-table"
+import { CreateRecordatorioDialog } from "@/components/dashboard/recordatorios/create-recordatorio-dialog"
 import type { Recordatorio, Cliente, PlantillaMensaje } from "@/lib/types"
 
 export default async function RecordatoriosPage() {
