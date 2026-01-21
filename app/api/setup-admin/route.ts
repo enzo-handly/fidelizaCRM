@@ -3,23 +3,11 @@ import { NextResponse } from "next/server"
 
 export async function POST() {
   try {
-    // Get credentials from environment variables
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPassword = process.env.ADMIN_PASSWORD
-    const adminName = process.env.ADMIN_NAME || "Admin User"
-
-    if (!adminEmail || !adminPassword) {
-      return NextResponse.json(
-        { error: "ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required" },
-        { status: 500 }
-      )
-    }
-
     const adminClient = createAdminClient()
 
     // Check if admin already exists
     const { data: existingUser } = await adminClient.auth.admin.listUsers()
-    const adminExists = existingUser?.users?.some((user) => user.email === adminEmail)
+    const adminExists = existingUser?.users?.some((user) => user.email === "enzo.galeano@handly.io")
 
     if (adminExists) {
       return NextResponse.json({ message: "Admin user already exists" }, { status: 200 })
@@ -27,12 +15,12 @@ export async function POST() {
 
     // Create the admin user
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-      email: adminEmail,
-      password: adminPassword,
+      email: "enzo.galeano@handly.io",
+      password: "F1d3liZ4!",
       email_confirm: true,
       user_metadata: {
         role: "admin",
-        full_name: adminName,
+        full_name: "Enzo Galeano",
       },
     })
 
@@ -44,7 +32,7 @@ export async function POST() {
     // Update the profile to set admin role
     const { error: updateError } = await adminClient
       .from("profiles")
-      .update({ role: "admin", full_name: adminName })
+      .update({ role: "admin", full_name: "Enzo Galeano" })
       .eq("id", newUser.user!.id)
 
     if (updateError) {

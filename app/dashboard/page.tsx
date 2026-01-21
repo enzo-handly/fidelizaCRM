@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarCheck, Bell, Users } from "lucide-react"
-import { DashboardChart } from "@/components/dashboard/shared/dashboard-chart"
+import { DashboardChart } from "@/components/dashboard/dashboard-chart"
 
 export default async function DashboardPage() {
   const supabase = await createClient()

@@ -1,13 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { CitasCalendar } from "@/components/dashboard/citas/citas-calendar"
-import { CreateCitaDialog } from "@/components/dashboard/citas/create-cita-dialog"
+import { CitasCalendar } from "@/components/dashboard/citas-calendar"
+import { CreateCitaDialog } from "@/components/dashboard/create-cita-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarCheck, CalendarClock } from "lucide-react"
 import type { Cita } from "@/lib/types"
-
-// This page requires authentication and must be dynamically rendered
-export const dynamic = 'force-dynamic'
 
 async function getPageData() {
   try {

@@ -1,14 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { withAuth } from "@/lib/auth/middleware"
-import { handleError, type ActionResult } from "@/lib/errors/error-handler"
-import { ClienteRepository } from "@/lib/repositories/cliente-repository"
-import { ClienteService } from "@/lib/services/cliente-service"
-import type { Cliente } from "@/lib/types"
+import { createClient } from "@/lib/supabase/server"
 
-// Re-export types for backward compatibility
-export interface CreateClienteData {
+interface CreateClienteData {
   nombre: string
   contacto?: string
   email?: string
@@ -17,7 +12,7 @@ export interface CreateClienteData {
   sexo?: "masculino" | "femenino" | "otro"
 }
 
-export interface UpdateClienteData {
+interface UpdateClienteData {
   nombre?: string
   contacto?: string
   email?: string
@@ -26,77 +21,77 @@ export interface UpdateClienteData {
   sexo?: "masculino" | "femenino" | "otro" | null
 }
 
-/**
- * Create a new cliente
- * Requires authentication
- */
-export async function createCliente(data: CreateClienteData): Promise<ActionResult<Cliente>> {
-  try {
-    // Authenticate user
-    const { supabase } = await withAuth()
-    
-    // Create service instance with repository
-    const repository = new ClienteRepository(supabase)
-    const service = new ClienteService(repository)
-    
-    // Create cliente using service (includes validation)
-    const cliente = await service.create(data)
-    
-    // Revalidate cache
-    revalidatePath("/dashboard/clientes")
-    
-    return { success: true, data: cliente }
-  } catch (error) {
-    return handleError(error)
+export async function createCliente(data: CreateClienteData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "Not authenticated" }
   }
+
+  const { error } = await supabase.from("clientes").insert({
+    nombre: data.nombre,
+    contacto: data.contacto || null,
+    email: data.email || null,
+    es_menor: data.es_menor,
+    nombre_responsable: data.es_menor ? data.nombre_responsable : null,
+    sexo: data.sexo || null,
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath("/dashboard/clientes")
+  return { success: true }
 }
 
-/**
- * Update an existing cliente
- * Requires authentication
- */
-export async function updateCliente(id: string, data: UpdateClienteData): Promise<ActionResult<Cliente>> {
-  try {
-    // Authenticate user
-    const { supabase } = await withAuth()
-    
-    // Create service instance with repository
-    const repository = new ClienteRepository(supabase)
-    const service = new ClienteService(repository)
-    
-    // Update cliente using service (includes validation)
-    const cliente = await service.update(id, data)
-    
-    // Revalidate cache
-    revalidatePath("/dashboard/clientes")
-    
-    return { success: true, data: cliente }
-  } catch (error) {
-    return handleError(error)
+export async function updateCliente(id: string, data: UpdateClienteData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "Not authenticated" }
   }
+
+  const updateData: UpdateClienteData = { ...data }
+
+  // If not a minor, clear the responsible person field
+  if (data.es_menor === false) {
+    updateData.nombre_responsable = undefined
+  }
+
+  const { error } = await supabase.from("clientes").update(updateData).eq("id", id)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath("/dashboard/clientes")
+  return { success: true }
 }
 
-/**
- * Delete a cliente (soft delete)
- * Requires authentication
- */
-export async function deleteCliente(id: string): Promise<ActionResult<void>> {
-  try {
-    // Authenticate user
-    const { supabase } = await withAuth()
-    
-    // Create service instance with repository
-    const repository = new ClienteRepository(supabase)
-    const service = new ClienteService(repository)
-    
-    // Delete cliente using service
-    await service.delete(id)
-    
-    // Revalidate cache
-    revalidatePath("/dashboard/clientes")
-    
-    return { success: true, data: undefined }
-  } catch (error) {
-    return handleError(error)
+export async function deleteCliente(id: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "Not authenticated" }
   }
+
+  // Soft delete by setting deleted_at timestamp
+  const { error } = await supabase.from("clientes").update({ deleted_at: new Date().toISOString() }).eq("id", id)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath("/dashboard/clientes")
+  return { success: true }
 }

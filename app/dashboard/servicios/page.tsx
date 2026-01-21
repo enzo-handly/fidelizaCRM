@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ServiciosView } from "@/components/dashboard/servicios/servicios-view"
+import { ServiciosView } from "@/components/dashboard/servicios-view"
 import { getServicios, getSubservicios } from "@/app/actions/servicios"
 
 export default async function ServiciosPage() {
