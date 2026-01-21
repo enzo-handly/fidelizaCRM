@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { UsersTable } from "@/components/dashboard/users-table"
-import { CreateUserDialog } from "@/components/dashboard/create-user-dialog"
+import { UsersTable } from "@/components/dashboard/usuarios/users-table"
+import { CreateUserDialog } from "@/components/dashboard/usuarios/create-user-dialog"
 import type { Profile } from "@/lib/types"
 
 export default async function UsuariosPage() {

@@ -1,114 +1,116 @@
 "use server"
 
-import { createServerClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { withAuth } from "@/lib/auth"
+import { handleError, success } from "@/lib/errors"
+import { ServicioService, SubservicioService, type CreateSubservicioDTO, type UpdateSubservicioDTO } from "@/lib/services"
+import { ServicioRepository, SubservicioRepository } from "@/lib/repositories/servicio-repository"
 import type { Servicio, Subservicio } from "@/lib/types"
+import type { ActionResult } from "@/lib/errors"
 
-export async function getServicios(): Promise<{ success: boolean; data?: Servicio[]; error?: string }> {
-  const supabase = await createServerClient()
-
-  const { data, error } = await supabase.from("servicios").select("*").order("nombre", { ascending: true })
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Get all servicios
+ */
+export async function getServicios(): Promise<ActionResult<Servicio[]>> {
+  try {
+    const { supabase } = await withAuth()
+    const servicioRepository = new ServicioRepository(supabase)
+    const servicioService = new ServicioService(servicioRepository)
+    
+    const servicios = await servicioService.findAll()
+    return success(servicios)
+  } catch (error) {
+    return handleError(error)
   }
-
-  return { success: true, data }
 }
 
-export async function getSubservicios(): Promise<{ success: boolean; data?: Subservicio[]; error?: string }> {
-  const supabase = await createServerClient()
-
-  const { data, error } = await supabase
-    .from("subservicios")
-    .select(`
-      *,
-      servicio:servicios(*)
-    `)
-    .is("deleted_at", null)
-    .order("nombre", { ascending: true })
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Get all subservicios with servicio relation
+ */
+export async function getSubservicios(): Promise<ActionResult<Subservicio[]>> {
+  try {
+    const { supabase } = await withAuth()
+    const subservicioRepository = new SubservicioRepository(supabase)
+    const servicioRepository = new ServicioRepository(supabase)
+    const subservicioService = new SubservicioService(subservicioRepository, servicioRepository)
+    
+    const subservicios = await subservicioService.findAll()
+    return success(subservicios)
+  } catch (error) {
+    return handleError(error)
   }
-
-  return { success: true, data }
 }
 
-export async function getSubserviciosByServicio(
-  servicioId: string,
-): Promise<{ success: boolean; data?: Subservicio[]; error?: string }> {
-  const supabase = await createServerClient()
-
-  const { data, error } = await supabase
-    .from("subservicios")
-    .select(`
-      *,
-      servicio:servicios(*)
-    `)
-    .eq("servicio_id", servicioId)
-    .is("deleted_at", null)
-    .order("nombre", { ascending: true })
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Get subservicios for a specific servicio
+ */
+export async function getSubserviciosByServicio(servicioId: string): Promise<ActionResult<Subservicio[]>> {
+  try {
+    const { supabase } = await withAuth()
+    const subservicioRepository = new SubservicioRepository(supabase)
+    const servicioRepository = new ServicioRepository(supabase)
+    const subservicioService = new SubservicioService(subservicioRepository, servicioRepository)
+    
+    const subservicios = await subservicioService.findByServicio(servicioId)
+    return success(subservicios)
+  } catch (error) {
+    return handleError(error)
   }
-
-  return { success: true, data }
 }
 
-export async function createSubservicio(data: {
-  servicio_id: string
-  nombre: string
-  precio_pyg: number
-}): Promise<{ success: boolean; data?: Subservicio; error?: string }> {
-  const supabase = await createServerClient()
-
-  const { data: newSubservicio, error } = await supabase.from("subservicios").insert(data).select().single()
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Create a new subservicio
+ */
+export async function createSubservicio(data: CreateSubservicioDTO): Promise<ActionResult<Subservicio>> {
+  try {
+    const { supabase } = await withAuth()
+    const subservicioRepository = new SubservicioRepository(supabase)
+    const servicioRepository = new ServicioRepository(supabase)
+    const subservicioService = new SubservicioService(subservicioRepository, servicioRepository)
+    
+    const subservicio = await subservicioService.create(data)
+    
+    revalidatePath("/dashboard/servicios")
+    return success(subservicio)
+  } catch (error) {
+    return handleError(error)
   }
-
-  revalidatePath("/dashboard/servicios")
-  return { success: true, data: newSubservicio }
 }
 
-export async function updateSubservicio(
-  id: string,
-  data: {
-    servicio_id?: string
-    nombre?: string
-    precio_pyg?: number
-  },
-): Promise<{ success: boolean; data?: Subservicio; error?: string }> {
-  const supabase = await createServerClient()
-
-  const { data: updatedSubservicio, error } = await supabase
-    .from("subservicios")
-    .update(data)
-    .eq("id", id)
-    .select()
-    .single()
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Update an existing subservicio
+ */
+export async function updateSubservicio(id: string, data: UpdateSubservicioDTO): Promise<ActionResult<Subservicio>> {
+  try {
+    const { supabase } = await withAuth()
+    const subservicioRepository = new SubservicioRepository(supabase)
+    const servicioRepository = new ServicioRepository(supabase)
+    const subservicioService = new SubservicioService(subservicioRepository, servicioRepository)
+    
+    const subservicio = await subservicioService.update(id, data)
+    
+    revalidatePath("/dashboard/servicios")
+    return success(subservicio)
+  } catch (error) {
+    return handleError(error)
   }
-
-  revalidatePath("/dashboard/servicios")
-  return { success: true, data: updatedSubservicio }
 }
 
-export async function deleteSubservicio(id: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createServerClient()
-
-  // Soft delete
-  const { error } = await supabase.from("subservicios").update({ deleted_at: new Date().toISOString() }).eq("id", id)
-
-  if (error) {
-    return { success: false, error: error.message }
+/**
+ * Delete a subservicio (soft delete)
+ */
+export async function deleteSubservicio(id: string): Promise<ActionResult<void>> {
+  try {
+    const { supabase } = await withAuth()
+    const subservicioRepository = new SubservicioRepository(supabase)
+    const servicioRepository = new ServicioRepository(supabase)
+    const subservicioService = new SubservicioService(subservicioRepository, servicioRepository)
+    
+    await subservicioService.delete(id)
+    
+    revalidatePath("/dashboard/servicios")
+    return success(undefined)
+  } catch (error) {
+    return handleError(error)
   }
-
-  revalidatePath("/dashboard/servicios")
-  return { success: true }
 }

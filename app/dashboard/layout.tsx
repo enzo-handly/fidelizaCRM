@@ -1,8 +1,8 @@
 import type React from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { DashboardSidebar } from "@/components/dashboard/sidebar"
-import { DashboardHeader } from "@/components/dashboard/header"
+import { DashboardSidebar } from "@/components/dashboard/layout/sidebar"
+import { DashboardHeader } from "@/components/dashboard/layout/header"
 import type { Profile } from "@/lib/types"
 
 export default async function DashboardLayout({

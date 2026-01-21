@@ -1,115 +1,100 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/lib/supabase/server"
+import { withAuth } from "@/lib/auth"
+import { handleError, success } from "@/lib/errors"
+import { RecordatorioService, type CreateRecordatorioDTO, type UpdateRecordatorioDTO } from "@/lib/services"
+import { RecordatorioRepository } from "@/lib/repositories/recordatorio-repository"
+import { ClienteRepository } from "@/lib/repositories/cliente-repository"
+import { PlantillaRepository } from "@/lib/repositories/plantilla-repository"
+import type { Recordatorio } from "@/lib/types"
+import type { ActionResult } from "@/lib/errors"
 
-interface CreateRecordatorioData {
-  cliente_id: string
-  plantilla_id: string
-  fecha_hora: string
-  telefono_destino: string
+/**
+ * Create a new recordatorio
+ */
+export async function createRecordatorio(data: CreateRecordatorioDTO): Promise<ActionResult<Recordatorio>> {
+  try {
+    const { supabase } = await withAuth()
+    const recordatorioRepository = new RecordatorioRepository(supabase)
+    const clienteRepository = new ClienteRepository(supabase)
+    const plantillaRepository = new PlantillaRepository(supabase)
+    const recordatorioService = new RecordatorioService(
+      recordatorioRepository,
+      clienteRepository,
+      plantillaRepository
+    )
+    
+    const recordatorio = await recordatorioService.create(data)
+    
+    revalidatePath("/dashboard/recordatorios")
+    return success(recordatorio)
+  } catch (error) {
+    return handleError(error)
+  }
 }
 
-interface UpdateRecordatorioData {
-  cliente_id?: string
-  plantilla_id?: string
-  fecha_hora?: string
-  telefono_destino?: string
-  estado?: "pendiente" | "enviado" | "fallido"
+/**
+ * Update an existing recordatorio
+ */
+export async function updateRecordatorio(id: string, data: UpdateRecordatorioDTO): Promise<ActionResult<Recordatorio>> {
+  try {
+    const { supabase } = await withAuth()
+    const recordatorioRepository = new RecordatorioRepository(supabase)
+    const clienteRepository = new ClienteRepository(supabase)
+    const plantillaRepository = new PlantillaRepository(supabase)
+    const recordatorioService = new RecordatorioService(
+      recordatorioRepository,
+      clienteRepository,
+      plantillaRepository
+    )
+    
+    const recordatorio = await recordatorioService.update(id, data)
+    
+    revalidatePath("/dashboard/recordatorios")
+    return success(recordatorio)
+  } catch (error) {
+    return handleError(error)
+  }
 }
 
-export async function createRecordatorio(data: CreateRecordatorioData) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
+/**
+ * Delete a recordatorio (soft delete)
+ */
+export async function deleteRecordatorio(id: string): Promise<ActionResult<void>> {
+  try {
+    const { supabase } = await withAuth()
+    const recordatorioRepository = new RecordatorioRepository(supabase)
+    const recordatorioService = new RecordatorioService(recordatorioRepository)
+    
+    await recordatorioService.delete(id)
+    
+    revalidatePath("/dashboard/recordatorios")
+    return success(undefined)
+  } catch (error) {
+    return handleError(error)
   }
-
-  const { error } = await supabase.from("recordatorios").insert({
-    cliente_id: data.cliente_id,
-    plantilla_id: data.plantilla_id,
-    fecha_hora: data.fecha_hora,
-    telefono_destino: data.telefono_destino,
-    estado: "pendiente",
-  })
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/dashboard/recordatorios")
-  return { success: true }
 }
 
-export async function updateRecordatorio(id: string, data: UpdateRecordatorioData) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
-
-  const { error } = await supabase.from("recordatorios").update(data).eq("id", id)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/dashboard/recordatorios")
-  return { success: true }
-}
-
-export async function deleteRecordatorio(id: string) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
-
-  // Soft delete by setting deleted_at timestamp
-  const { error } = await supabase.from("recordatorios").update({ deleted_at: new Date().toISOString() }).eq("id", id)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/dashboard/recordatorios")
-  return { success: true }
-}
-
+/**
+ * Update recordatorio status
+ */
 export async function updateRecordatorioEstado(
   id: string,
   estado: "pendiente" | "enviado" | "fallido",
   wahaPayload?: Record<string, unknown>,
-  wahaResponse?: Record<string, unknown>,
-) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
+  wahaResponse?: Record<string, unknown>
+): Promise<ActionResult<Recordatorio>> {
+  try {
+    const { supabase } = await withAuth()
+    const recordatorioRepository = new RecordatorioRepository(supabase)
+    const recordatorioService = new RecordatorioService(recordatorioRepository)
+    
+    const recordatorio = await recordatorioService.updateEstado(id, estado, wahaPayload, wahaResponse)
+    
+    revalidatePath("/dashboard/recordatorios")
+    return success(recordatorio)
+  } catch (error) {
+    return handleError(error)
   }
-
-  const updateData: Record<string, unknown> = { estado }
-  if (wahaPayload) updateData.waha_payload = wahaPayload
-  if (wahaResponse) updateData.waha_response = wahaResponse
-
-  const { error } = await supabase.from("recordatorios").update(updateData).eq("id", id)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/dashboard/recordatorios")
-  return { success: true }
 }

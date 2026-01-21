@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { PlantillasTable } from "@/components/dashboard/plantillas-table"
-import { CreatePlantillaDialog } from "@/components/dashboard/create-plantilla-dialog"
+import { PlantillasTable } from "@/components/dashboard/plantillas/plantillas-table"
+import { CreatePlantillaDialog } from "@/components/dashboard/plantillas/create-plantilla-dialog"
 import type { PlantillaMensaje } from "@/lib/types"
 
 export default async function PlantillasPage() {
