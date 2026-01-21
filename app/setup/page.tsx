@@ -46,14 +46,6 @@ export default function SetupPage() {
               <span className="text-muted-foreground">Email:</span>
               <span className="font-medium">enzo.galeano@handly.io</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Password:</span>
-              <span className="font-mono">F1d3liZ4!</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Role:</span>
-              <span className="font-medium">Admin</span>
-            </div>
           </div>
 
           <Button onClick={setupAdmin} disabled={loading} className="w-full">
