@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarCheck, CalendarClock } from "lucide-react"
 import type { Cita } from "@/lib/types"
 
+// This page requires authentication and must be dynamically rendered
+export const dynamic = 'force-dynamic'
+
 async function getPageData() {
   try {
     const supabase = await createClient()
