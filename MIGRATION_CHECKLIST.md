@@ -577,11 +577,11 @@
   - [ ] Habilitar optimización de imágenes
   - [ ] Configurar `remotePatterns` para Supabase
 
-- [ ] **Seguridad**
-  - [ ] Crear `.env.example` (sin valores reales)
-  - [ ] Remover credenciales hardcodeadas de scripts/seed-admin.ts
-  - [ ] Remover credenciales hardcodeadas de app/api/setup-admin/route.ts
-  - [ ] Verificar que `.env.local` está en `.gitignore`
+- [x] **Seguridad**
+  - [x] Crear `.env.example` (sin valores reales)
+  - [x] Remover credenciales hardcodeadas de scripts/seed-admin.ts
+  - [x] Remover credenciales hardcodeadas de app/api/setup-admin/route.ts
+  - [x] Verificar que `.env.local` está en `.gitignore`
 
 - [ ] **Error Boundaries**
   - [ ] Crear `app/error.tsx` (global)
