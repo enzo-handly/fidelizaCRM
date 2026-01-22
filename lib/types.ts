@@ -21,6 +21,20 @@ export interface Cliente {
   deleted_at: string | null
 }
 
+export interface ClienteEstadisticas {
+  total_facturado: number
+  cantidad_citas: number
+  monto_promedio: number
+  ultima_visita: string | null
+}
+
+export interface ClienteConEstadisticas extends Cliente {
+  total_facturado: number
+  cantidad_citas: number
+  monto_promedio: number
+  ultima_visita: string | null
+}
+
 export interface PlantillaMensaje {
   id: string
   titulo: string
