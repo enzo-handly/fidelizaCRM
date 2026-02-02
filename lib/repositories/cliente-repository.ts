@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { BaseRepository } from "./base-repository"
-import type { Cliente } from "@/lib/types"
+import type { Cliente, ClienteConEstadisticas } from "@/lib/types"
 import { DatabaseError } from "@/lib/errors/app-errors"
 
 /**
@@ -127,6 +127,29 @@ export class ClienteRepository extends BaseRepository<Cliente, CreateClienteDTO,
     } catch (error) {
       if (error instanceof DatabaseError) throw error
       throw new DatabaseError("Error inesperado al contar clientes", error)
+    }
+  }
+
+  /**
+   * Find all clientes with statistics from the optimized database view
+   * Uses clientes_estadisticas view for better performance
+   */
+  async findAllWithEstadisticas(): Promise<ClienteConEstadisticas[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('clientes_estadisticas')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw new DatabaseError(`Error al obtener clientes con estadísticas: ${error.message}`, error)
+      }
+
+      return (data || []) as ClienteConEstadisticas[]
+    } catch (error) {
+      if (error instanceof DatabaseError) throw error
+      throw new DatabaseError("Error inesperado al obtener clientes con estadísticas", error)
     }
   }
 }

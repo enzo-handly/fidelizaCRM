@@ -2,7 +2,10 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { ClientesTable } from "@/components/dashboard/clientes/clientes-table"
 import { CreateClienteDialog } from "@/components/dashboard/clientes/create-cliente-dialog"
-import type { Cliente } from "@/lib/types"
+import type { ClienteConEstadisticas } from "@/lib/types"
+
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic'
 
 export default async function ClientesPage() {
   const supabase = await createClient()
@@ -12,9 +15,9 @@ export default async function ClientesPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  // Get all non-deleted clients
+  // Get all non-deleted clients with statistics from the optimized view
   const { data: clientes } = await supabase
-    .from("clientes")
+    .from("clientes_estadisticas")
     .select("*")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
@@ -29,7 +32,7 @@ export default async function ClientesPage() {
         <CreateClienteDialog />
       </div>
 
-      <ClientesTable clientes={(clientes as Cliente[]) || []} />
+      <ClientesTable clientes={(clientes as ClienteConEstadisticas[]) || []} />
     </div>
   )
 }

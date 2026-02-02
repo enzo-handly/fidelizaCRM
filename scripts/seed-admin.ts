@@ -15,26 +15,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 async function seedAdmin() {
   try {
-    // Get credentials from environment variables
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPassword = process.env.ADMIN_PASSWORD
-    const adminName = process.env.ADMIN_NAME || "Admin User"
-
-    if (!adminEmail || !adminPassword) {
-      console.error("Error: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required")
-      console.log("Please set them in your .env.local file or pass them as environment variables")
-      process.exit(1)
-    }
-
     console.log("Creating admin user...")
 
     // Create the admin user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: adminEmail,
-      password: adminPassword,
+      email: "enzo.galeano@handly.io",
+      password: "F1d3liZ4!",
       email_confirm: true, // Auto-confirm the email
       user_metadata: {
-        full_name: adminName,
+        full_name: "Enzo Galeano",
         role: "admin",
       },
     })
@@ -63,8 +52,8 @@ async function seedAdmin() {
 
     console.log("Profile created with role:", profile.role)
     console.log("\nYou can now login with:")
-    console.log("Email:", process.env.ADMIN_EMAIL)
-    console.log("Password: [hidden for security]")
+    console.log("Email: enzo.galeano@handly.io")
+    console.log("Password: F1d3liZ4!")
   } catch (error) {
     console.error("Unexpected error:", error)
   }
